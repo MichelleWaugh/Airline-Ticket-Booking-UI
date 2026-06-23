@@ -1,0 +1,315 @@
+<apex:page >
+
+<style>
+body {
+    margin:0;
+    font-family: 'Arial';
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+
+/* HEADER */
+.header {
+    text-align:center;
+    color:white;
+    font-size:32px;
+    padding:20px;
+    font-weight:bold;
+}
+
+/* LAYOUT */
+.container {
+    display:flex;
+    gap:20px;
+    padding:20px;
+}
+
+/* LEFT PANEL */
+.panel {
+    width:30%;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+}
+
+/* RIGHT PANEL */
+.dashboard {
+    width:70%;
+}
+
+/* CONTROLS */
+input, select {
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button {
+    padding:8px 10px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin:3px;
+}
+
+.add { background:#2ecc71; color:white; }
+.save { background:#3498db; color:white; }
+.edit { background:#f39c12; color:white; }
+.delete { background:#e74c3c; color:white; }
+
+/* FLIGHT CARDS */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap:15px;
+}
+
+.card {
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    transition:0.2s;
+}
+
+.card:hover {
+    transform:scale(1.03);
+    box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* BADGES */
+.badge {
+    padding:4px 8px;
+    border-radius:5px;
+    font-size:12px;
+    color:white;
+}
+
+.domestic { background:#27ae60; }
+.international { background:#8e44ad; }
+
+.small {
+    font-size:13px;
+    color:#555;
+}
+</style>
+
+<div class="header">✈ Skyline Air</div>
+
+<div class="container">
+
+<!-- LEFT PANEL -->
+<div class="panel">
+
+<h3>Booking Form</h3>
+
+<input type="hidden" id="editIndex"/>
+
+Name:
+<input type="text" id="name"/>
+
+Filter Flights:
+<select id="filter" onchange="renderFlights()">
+    <option value="all">All</option>
+    <option value="domestic">Domestic</option>
+    <option value="international">International</option>
+</select>
+
+Search:
+<input type="text" id="search" placeholder="Flight / From / To" onkeyup="renderFlights()"/>
+
+Flight:
+<select id="flightSelect" onchange="updatePrice()"></select>
+
+Seats:
+<input type="number" id="seats" onkeyup="updatePrice()"/>
+
+<div class="small">Total Price: ₹<span id="price">0</span></div>
+
+<button class="add" onclick="addBooking()">Add</button>
+<button class="save" onclick="saveEdit()">Save</button>
+
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="dashboard">
+
+<h3 style="color:white">Available Flights</h3>
+<div class="grid" id="flightGrid"></div>
+
+<h3 style="color:white">Bookings</h3>
+<div class="grid" id="bookingGrid"></div>
+
+</div>
+
+</div>
+
+<script>
+
+/* FLIGHT DATA */
+const flights = [
+"F102,Pune,Bangalore,4000",
+"F103,Chennai,Delhi,5500",
+"F104,Hyderabad,Kolkata,4800",
+"F105,Mumbai,Goa,3000",
+"F106,Delhi,Jaipur,2500",
+"F107,Bangalore,Chennai,3500",
+"F108,Pune,Delhi,5200",
+"F109,Kolkata,Hyderabad,4700",
+"F110,Goa,Mumbai,3200",
+"F111,Delhi,Bangalore,6000",
+"F112,Mumbai,Chennai,5800",
+"F113,Pune,Hyderabad,4200",
+"F114,Jaipur,Delhi,2600",
+"F115,Kolkata,Delhi,6100",
+"F201,Delhi,Dubai,15000",
+"F202,Mumbai,Singapore,18000",
+"F203,Bangalore,London,45000",
+"F204,Delhi,NewYork,70000",
+"F205,Chennai,KualaLumpur,20000",
+"F206,Hyderabad,Doha,17000",
+"F207,Mumbai,Paris,48000",
+"F208,Delhi,Tokyo,55000",
+"F209,Bangalore,Sydney,65000",
+"F210,Kolkata,Bangkok,22000",
+"F211,Delhi,Beijing,30000",
+"F212,Mumbai,Shanghai,32000",
+"F213,Bangalore,SanFrancisco,75000",
+"F214,Delhi,LosAngeles,78000",
+"F215,Mumbai,CapeTown,52000"
+];
+
+let bookings = [];
+
+/* UTIL */
+function isDomestic(from, to) {
+    const ind = ["Delhi","Mumbai","Pune","Chennai","Bangalore","Hyderabad","Kolkata","Goa","Jaipur"];
+    return ind.includes(from) && ind.includes(to);
+}
+
+/* INIT */
+renderFlights();
+renderDropdown();
+
+/* DROPDOWN */
+function renderDropdown() {
+    const sel = document.getElementById("flightSelect");
+    sel.innerHTML = "";
+
+    flights.forEach(f => {
+        const [id, from, to, price] = f.split(",");
+        let opt = document.createElement("option");
+        opt.value = f;
+        opt.text = id + " " + from + "→" + to + " ₹" + price;
+        sel.appendChild(opt);
+    });
+}
+
+/* FLIGHT GRID */
+function renderFlights() {
+
+    const type = document.getElementById("filter").value;
+    const search = document.getElementById("search").value.toLowerCase();
+
+    const grid = document.getElementById("flightGrid");
+    grid.innerHTML = "";
+
+    flights.forEach(f => {
+
+        const [id, from, to, price] = f.split(",");
+        const domestic = isDomestic(from,to);
+
+        if (
+            (type==="domestic" && !domestic) ||
+            (type==="international" && domestic)
+        ) return;
+
+        if (
+            search &&
+            !(id+from+to).toLowerCase().includes(search)
+        ) return;
+
+        grid.innerHTML += `
+        <div class="card">
+            <b>${id}</b><br/>
+            ${from} → ${to}<br/>
+            ₹${price}<br/>
+            <span class="badge ${domestic?'domestic':'international'}">
+                ${domestic?'Domestic':'International'}
+            </span>
+        </div>`;
+    });
+}
+
+/* PRICE */
+function updatePrice() {
+    const flight = document.getElementById("flightSelect").value;
+    const seats = document.getElementById("seats").value || 0;
+
+    const [, , , price] = flight.split(",");
+    document.getElementById("price").innerText = price * seats;
+}
+
+/* ADD */
+function addBooking() {
+    const name = document.getElementById("name").value;
+    const flight = document.getElementById("flightSelect").value;
+    const seats = document.getElementById("seats").value;
+
+    const [id, from, to, price] = flight.split(",");
+    bookings.push({name,id,from,to,price,seats,total:price*seats});
+
+    renderBookings();
+}
+
+/* EDIT */
+function editBooking(i) {
+    const b = bookings[i];
+    document.getElementById("editIndex").value = i;
+    document.getElementById("name").value = b.name;
+    document.getElementById("seats").value = b.seats;
+}
+
+/* SAVE EDIT */
+function saveEdit() {
+    const i = document.getElementById("editIndex").value;
+
+    const name = document.getElementById("name").value;
+    const flight = document.getElementById("flightSelect").value;
+    const seats = document.getElementById("seats").value;
+
+    const [id, from, to, price] = flight.split(",");
+    bookings[i] = {name,id,from,to,price,seats,total:price*seats};
+
+    renderBookings();
+}
+
+/* DELETE */
+function deleteBooking(i) {
+    bookings.splice(i,1);
+    renderBookings();
+}
+
+/* BOOKINGS UI */
+function renderBookings() {
+
+    const grid = document.getElementById("bookingGrid");
+    grid.innerHTML = "";
+
+    bookings.forEach((b,i)=> {
+        grid.innerHTML += `
+        <div class="card">
+            <b>${b.name}</b><br/>
+            ${b.id} ${b.from}→${b.to}<br/>
+            Seats: ${b.seats}<br/>
+            Total: ₹${b.total}<br/>
+
+            <button class="edit" onclick="editBooking(${i})">Edit</button>
+            <button class="delete" onclick="deleteBooking(${i})">Delete</button>
+        </div>`;
+    });
+}
+
+</script>
+
+</apex:page>
