@@ -202,31 +202,29 @@ You need:
 Salesforce Developer Org or Sandbox
 System Administrator access
 Visualforce enabled
+
 Step 1: Login to Salesforce
 Open Salesforce.
 Login using your credentials.
 Switch to Lightning Experience (if not already).
+
 Step 2: Open Visualforce Pages
 Option 1: Using Setup
 Click Gear Icon → Setup.
 In the Quick Find box, search:
 Visualforce Pages
 Click Visualforce Pages.
+
 Step 3: Create New Visualforce Page
 
-Click:
+Click: New
 
-New
-
-Enter:
-
-Label: Skyline Air
+Enter: Label: Skyline Air
 
 Name: SkylineAir
 
-Then click:
+Then click: Save
 
-Save
 Step 4: Paste the Code
 
 Delete the default code:
@@ -260,11 +258,10 @@ Example:
 Click:
 
 Save
+
 Step 5: Preview the Page
 
-Click:
-
-Preview
+Click: Preview
 
 Salesforce generates a URL similar to:
 
@@ -277,6 +274,7 @@ Booking Form
 Flight Cards
 Search functionality
 Booking Dashboard
+
 Step 6: Add Visualforce Page to a Lightning App
 Create a Visualforce Tab
 
@@ -284,29 +282,18 @@ Go to:
 
 Setup → Tabs
 
-Under:
+Under: Visualforce Tabs
 
-Visualforce Tabs
+Click: New
 
-Click:
+Select: Visualforce Page = SkylineAir
 
-New
+Choose: Tab Label = Skyline Air
 
-Select:
+Select: Tab Style = Airplane Icon (or any icon)
 
-Visualforce Page = SkylineAir
+Click: Next → Save
 
-Choose:
-
-Tab Label = Skyline Air
-
-Select:
-
-Tab Style = Airplane Icon (or any icon)
-
-Click:
-
-Next → Save
 Step 7: Add Tab to Application
 
 Navigate to:
@@ -315,18 +302,11 @@ Setup → App Manager
 
 Choose your Lightning App.
 
-Click:
+Click: Edit
 
-Edit
+Go to: Navigation Items
 
-Go to:
-
-Navigation Items
-
-Move:
-
-Skyline Air
-
+Move: Skyline Air
 from Available Items to Selected Items.
 
 Save.
@@ -337,9 +317,7 @@ Launch the app.
 
 You should now see:
 
-Skyline Air
-
-in the navigation menu.
+Skyline Air in the navigation menu.
 
 Click it.
 
@@ -366,13 +344,7 @@ function isDomestic(from,to)
 
 Checks whether both cities belong to India.
 
-Returns:
-
-true
-
-or
-
-false
+Returns: true or false
 
 Used for:
 
@@ -454,7 +426,8 @@ Multi-user access
 Real-world airline booking simulation
 
 ## Author
-Michelle Waugh
+Michelle Waugh.
+
 Only used for Educational Purposes
 Developed using Salesforce Visualforce, HTML, CSS, and JavaScript.
 
