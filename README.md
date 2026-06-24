@@ -1,5 +1,5 @@
 # Airline-Ticket-Booking-UI
-# Skyline Air - Flight Booking Management System
+# Skyline Air - Flight Ticket Booking System
 
 ## Overview
 
